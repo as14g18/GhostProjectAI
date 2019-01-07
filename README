@@ -1,0 +1,28 @@
+This game runs on gnu/linux (by command line) and windows, if you have the pygame lib and any python compiler installed.
+
+SS, and spritesheet classes were taken as a reference from the following link:
+
+http://www.pygame.org/wiki/Spritesheet
+
+
+Have fun :)
+
+CONTROLS !!! 
+
+PLAYER 1 (aka blue ghost)
+
+W,S,A,D - MOVE THE GHOST
+F - SHOOT THE ECTOPLASMA PARTICLES
+G - DROP THE ECTOMINES
+
+PLAYER 2 (aka green ghost)
+
+UP,DOWN,LEFT,RIGHT - MOVE THE GHOST
+RIGHTCTRL - SHOOT THE ECTOPLASMA PARTICLES
+RIGHTSHIFT - DROP THE ECTOMINES
+
+IF YOU HAVE A JOYPAD YOU CAN CONTROL THE GREEN GHOST WITH THE FOLLOWING COMMANDS:
+
+D PAD OR LEFT ANALOG PAD - MOVE THE GHOST
+X OR BUTTON NUMBA 3 - SHOOT THE ECTOPLASMA PARTICLES
+□ OR BUTTON NUMBA 4 - DROP THE ECTOMINES
