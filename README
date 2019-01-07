@@ -1,3 +1,5 @@
+ORIGINAL SOURCE FOUND AT http://code.google.com/p/ghostproject/
+
 This game runs on gnu/linux (by command line) and windows, if you have the pygame lib and any python compiler installed.
 
 SS, and spritesheet classes were taken as a reference from the following link:
