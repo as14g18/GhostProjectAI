@@ -28,6 +28,7 @@ from pygame import mixer
 import spritesheet
 import random
 from SS import SpriteStripAnim
+from AkhiAI import AkhiAI
 
 os.environ["SDL_VIDEO_CENTERED"] = "1"
 
@@ -36,13 +37,17 @@ screen = pygame.display.set_mode((800,600))
 gamestate = 1
 escpressed = False
 
-#options
+
+# options
 def option1():
     global gamestate
     gamestate = 2
+
+
 def option2():
     global gamestate
     gamestate = 0
+
 
 class Button(pygame.sprite.Sprite):
     def __init__(self, image, coord, index):
@@ -54,9 +59,9 @@ class Button(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
 
-class Menu():
+class Menu:
     def __init__(self, bg,  *items):
-        self.x = screen.get_width() /2; self.y = screen.get_height()/2
+        self.x, self.y = screen.get_width() / 2, screen.get_height() / 2
         self.items = items
         self.clock = pygame.time.Clock()
         self.buttons = []
@@ -93,7 +98,8 @@ class Menu():
         for b in self.buttons:
             b.draw()
         pygame.display.flip()
-    
+
+
 class Mine(pygame.sprite.Sprite):
     def __init__(self, x, y):
         self.image = pygame.image.load("images/mine.gif").convert_alpha()
@@ -102,6 +108,7 @@ class Mine(pygame.sprite.Sprite):
 
     def draw(self):
         screen.blit(self.image, self.rect)
+
 
 class PowerUp(pygame.sprite.Sprite):
     
@@ -114,6 +121,7 @@ class PowerUp(pygame.sprite.Sprite):
         if self.gotPowerUp == False:
             screen.blit(self.image, self.rect)
 
+
 class Background(pygame.sprite.Sprite):
 
     def __init__( self, image="images/BGHOME.png"):
@@ -122,9 +130,9 @@ class Background(pygame.sprite.Sprite):
 
     def draw(self):
         screen.blit(self.image, self.rect)
-        
+
+
 class Ghost(pygame.sprite.Sprite):
-    
     def __init__(self,x,y,file):
         self.strip = SpriteStripAnim(file, (0,0,50,80), 8, (0,0,0),   True, 2)
         self.image = self.strip.images[0]
@@ -150,8 +158,8 @@ class Ghost(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(self.image, self.rect)
 
-class Shoot(pygame.sprite.Sprite):
 
+class Shoot(pygame.sprite.Sprite):
     def __init__(self,x,y, flip):
         self.image = pygame.image.load("images/shoot.png").convert_alpha()
         self.rect = self.image.get_rect()
@@ -166,7 +174,6 @@ class Shoot(pygame.sprite.Sprite):
 
 
 class Game:
-
     def __init__(self):        
         #ghosts!
         self.ghost = Ghost(20,80, 'images/ssGhostM.gif')
@@ -201,6 +208,10 @@ class Game:
         self.shoot2 = pygame.image.load('images/shootV.png').convert_alpha()
         self.count = 0
         self.count2 = 0
+
+        # AI Initialization
+        self.AI = AkhiAI(screen.get_width() / 2, screen.get_height() / 2, (50, 80), 10)
+        self.AI2 = AkhiAI(screen.get_width() / 2, screen.get_height() / 2, (50, 80), 10)
         
         #joystick
         if pygame.joystick.get_count() > 0:
@@ -337,61 +348,77 @@ class Game:
             self.draw()
     
     def inputPlayer(self, keyb):
+        x_vel, y_vel = self.AI.get_velocity(self.mines, self.shots, self.powerup,
+                                            (self.ghost.rect.x, self.ghost.rect.y),
+                                            (self.ghostV.rect.x, self.ghostV.rect.y))
+        do_shoot = self.AI.do_shoot(self.mines, self.shots, self.powerup,
+                                    (self.ghost.rect.x, self.ghost.rect.y),
+                                    (self.ghostV.rect.x, self.ghostV.rect.y))
+        do_place_mine = self.AI.do_place_mine(self.mines, self.shots, self.powerup,
+                                              (self.ghost.rect.x, self.ghost.rect.y),
+                                              (self.ghostV.rect.x, self.ghostV.rect.y))
+
         if self.ghost.rect.y > 0:
-            if keyb[pygame.K_UP]:
+            if y_vel > 0:
                 self.ghost.move(0,-10)
         if self.ghost.rect.y + self.ghost.rect.height < screen.get_height():
-            if keyb[pygame.K_DOWN]:
-                self.ghost.move(0,10)
+            if y_vel < 0:
+                self.ghost.move(0, 10)
         if self.ghost.rect.x > 0:
-            if keyb[pygame.K_LEFT]:
+            if x_vel < 0:
                 self.ghost.flip = True
-                self.ghost.move(-10,0)
+                self.ghost.move(-10, 0)
         if self.ghost.rect.x + self.ghost.rect.width < screen.get_width():
-            if keyb[pygame.K_RIGHT]:
+            if x_vel > 0:
                 self.ghost.flip = False
-                self.ghost.move(10,0)
-        if keyb[pygame.K_RCTRL] and self.hasShot:
-            self.shots.append(Shoot(self.ghost.rect.x + self.ghost.rect.width /2, self.ghost.rect.y + (self.ghost.rect.height / 2), self.ghost.flip))
-            self.hasShot = False
+                self.ghost.move(10, 0)
+
+        if do_shoot and len(self.shots) < 2:
+            self.shots.append(
+                Shoot(self.ghost.rect.x + self.ghost.rect.width / 2, self.ghost.rect.y + (self.ghost.rect.height / 2),
+                      self.ghost.flip))
             self.sfx2.play()
-        if not keyb[pygame.K_RCTRL]:
-            self.hasShot = True
-        if keyb[pygame.K_RSHIFT]:
-            if len(self.mines) < 3 and self.hasMined:
+
+        if do_place_mine:
+            if len(self.mines) < 3:
                 self.mines.append(Mine(self.ghost.rect.x - 30, self.ghost.rect.y))
-                self.hasMined = False
-        else:
-            self.hasMined = True
 
     def inputPlayer2(self, keyb):            
+        x_vel, y_vel = self.AI2.get_velocity(self.mines2, self.shots2, self.powerup,
+                                            (self.ghostV.rect.x, self.ghostV.rect.y),
+                                            (self.ghost.rect.x, self.ghost.rect.y))
+        do_shoot = self.AI2.do_shoot(self.mines2, self.shots2, self.powerup,
+                                            (self.ghostV.rect.x, self.ghostV.rect.y),
+                                            (self.ghost.rect.x, self.ghost.rect.y))
+        do_place_mine = self.AI2.do_place_mine(self.mines2, self.shots2, self.powerup,
+                                            (self.ghostV.rect.x, self.ghostV.rect.y),
+                                            (self.ghost.rect.x, self.ghost.rect.y))
+
         if self.ghostV.rect.y > 0:
-            if keyb[pygame.K_w]:
+            if y_vel > 0:
                 self.ghostV.move(0,-10)
         if self.ghostV.rect.y + self.ghostV.rect.height < screen.get_height():
-            if keyb[pygame.K_s]:
-                self.ghostV.move(0,10)
+            if y_vel < 0:
+                self.ghostV.move(0, 10)
         if self.ghostV.rect.x > 0:
-            if keyb[pygame.K_a]:
+            if x_vel < 0:
                 self.ghostV.flip = True
-                self.ghostV.move(-10,0)
+                self.ghostV.move(-10, 0)
         if self.ghostV.rect.x + self.ghostV.rect.width < screen.get_width():
-            if keyb[pygame.K_d]:
+            if x_vel > 0:
                 self.ghostV.flip = False
-                self.ghostV.move(10,0)
-        if keyb[pygame.K_f] and self.hasShot2:
-            self.shots2.append(Shoot(self.ghostV.rect.x + self.ghostV.rect.width /2, self.ghostV.rect.y + (self.ghostV.rect.height / 2), self.ghostV.flip))
-            self.hasShot2 = False
+                self.ghostV.move(10, 0)
+
+        if do_shoot and len(self.shots2) < 2:
+            self.shots2.append(
+                Shoot(self.ghostV.rect.x + self.ghostV.rect.width / 2, self.ghostV.rect.y + (self.ghostV.rect.height / 2),
+                      self.ghostV.flip))
             self.sfx2.play()
-        if not keyb[pygame.K_f]:
-            self.hasShot2 = True
-        if keyb[pygame.K_g]:
-            if len(self.mines2) < 3 and self.hasMined2:
+
+        if do_place_mine:
+            if len(self.mines2) < 3:
                 self.mines2.append(Mine(self.ghostV.rect.x - 30, self.ghostV.rect.y))
-                self.hasMined2 = False
-        else:
-            self.hasMined2 = True            
-    
+
     def draw(self):
         screen.fill((255,255,255))
         self.bg.draw()
@@ -442,20 +469,19 @@ class Game:
         for m in self.mines2:
             m.draw()
         
-        if self.powerup.gotPowerUp == False:
+        if not self.powerup.gotPowerUp:
             if self.ghostV.alive:
                 if self.ghostV.rect.colliderect(self.powerup.rect):
                     self.powerup.gotPowerUp = True
                     self.ghostV.hp += 50
-                    if self.ghostV.hp >200: self.ghostV.hp = 200
+                    if self.ghostV.hp > 200: self.ghostV.hp = 200
             if self.ghost.alive:
                 if self.ghost.rect.colliderect(self.powerup.rect) :
                     self.powerup.gotPowerUp = True
                     self.ghost.hp += 50
-                    if self.ghost.hp >200: self.ghost.hp = 200
+                    if self.ghost.hp > 200: self.ghost.hp = 200
         
         pygame.display.flip()
-    
 
 
 while True:
