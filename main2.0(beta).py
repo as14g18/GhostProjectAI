@@ -348,15 +348,15 @@ class Game:
             self.draw()
     
     def inputPlayer(self, keyb):
-        x_vel, y_vel = self.AI.get_velocity(self.mines, self.shots, self.powerup,
+        x_vel, y_vel = self.AI.get_velocity(self.mines, self.shots, self.mines2, self.shots2, (self.powerup.rect.x, self.powerup.rect.y),
                                             (self.ghost.rect.x, self.ghost.rect.y),
                                             (self.ghostV.rect.x, self.ghostV.rect.y))
-        do_shoot = self.AI.do_shoot(self.mines, self.shots, self.powerup,
-                                    (self.ghost.rect.x, self.ghost.rect.y),
-                                    (self.ghostV.rect.x, self.ghostV.rect.y))
-        do_place_mine = self.AI.do_place_mine(self.mines, self.shots, self.powerup,
-                                              (self.ghost.rect.x, self.ghost.rect.y),
-                                              (self.ghostV.rect.x, self.ghostV.rect.y))
+        do_shoot = self.AI.do_shoot(self.mines, self.shots, self.mines2, self.shots2, (self.powerup.rect.x, self.powerup.rect.y),
+                                            (self.ghost.rect.x, self.ghost.rect.y),
+                                            (self.ghostV.rect.x, self.ghostV.rect.y))
+        do_place_mine = self.AI.do_place_mine(self.mines, self.shots, self.mines2, self.shots2, (self.powerup.rect.x, self.powerup.rect.y),
+                                            (self.ghost.rect.x, self.ghost.rect.y),
+                                            (self.ghostV.rect.x, self.ghostV.rect.y))
 
         if self.ghost.rect.y > 0:
             if y_vel > 0:
@@ -384,13 +384,13 @@ class Game:
                 self.mines.append(Mine(self.ghost.rect.x - 30, self.ghost.rect.y))
 
     def inputPlayer2(self, keyb):            
-        x_vel, y_vel = self.AI2.get_velocity(self.mines2, self.shots2, self.powerup,
+        x_vel, y_vel = self.AI2.get_velocity(self.mines2, self.shots2, self.mines, self.shots, (self.powerup.rect.x, self.powerup.rect.y),
                                             (self.ghostV.rect.x, self.ghostV.rect.y),
                                             (self.ghost.rect.x, self.ghost.rect.y))
-        do_shoot = self.AI2.do_shoot(self.mines2, self.shots2, self.powerup,
+        do_shoot = self.AI2.do_shoot(self.mines2, self.shots2, self.mines, self.shots, (self.powerup.rect.x, self.powerup.rect.y),
                                             (self.ghostV.rect.x, self.ghostV.rect.y),
                                             (self.ghost.rect.x, self.ghost.rect.y))
-        do_place_mine = self.AI2.do_place_mine(self.mines2, self.shots2, self.powerup,
+        do_place_mine = self.AI2.do_place_mine(self.mines2, self.shots2, self.mines, self.shots, (self.powerup.rect.x, self.powerup.rect.y),
                                             (self.ghostV.rect.x, self.ghostV.rect.y),
                                             (self.ghost.rect.x, self.ghost.rect.y))
 

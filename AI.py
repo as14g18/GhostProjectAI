@@ -9,13 +9,13 @@ class AI(ABC):
         self.player_speed = player_speed
 
     @abstractmethod
-    def get_velocity(self, list_mines, list_bullets, list_health, my_pos, opponent_pos):
+    def get_velocity(self, my_mines, my_bullets, opponent_mines, opponent_bullets, health_pos, my_pos, opponent_pos):
         return 0, 0  # return tuple for coordinates
 
     @abstractmethod
-    def do_shoot(self, list_mines, list_bullets, list_health, my_pos, opponent_pos):
+    def do_shoot(self, my_mines, my_bullets, opponent_mines, opponent_bullets, list_health, my_pos, opponent_pos):
         return True  # return whether to shoot or not
 
     @abstractmethod
-    def do_place_mine(self, list_mines, list_bullets, list_health, my_pos, opponent_pos):
+    def do_place_mine(self, my_mines, my_bullets, opponent_mines, opponent_bullets, list_health, my_pos, opponent_pos):
         return True
